@@ -1,16 +1,24 @@
 import socket
+import sys
+from repl_mode import run_repl
 
-# Creează socket-ul TCP al clientului
+if len(sys.argv) < 2:
+    print("Eroare: Specificați portul! Utilizare: python client.py <port>")
+    sys.exit(1)
+
+PORT = int(sys.argv[1])
+HOST = '127.0.0.1'
+
 client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-client_socket.connect(('127.0.0.1', 1234))  # Se conectează la server
 
-# Trimite un mesaj către server
-mesaj = input("Mesaj: ")
-client_socket.send(mesaj.encode('utf-8'))
+try:
+    client_socket.connect((HOST, PORT))
+    print("✔ Conexiune reușită la server!")
 
-# Așteaptă răspunsul de la server
-raspuns = client_socket.recv(1024).decode('utf-8')
-print(f"Răspuns de la server: {raspuns}")
+    # Lansăm modul REPL din fișierul separat
+    run_repl(client_socket)
 
-# Închide socket-ul
-client_socket.close()
+except Exception as e:
+    print(f"Eroare conexiune: {e}")
+finally:
+    client_socket.close()
