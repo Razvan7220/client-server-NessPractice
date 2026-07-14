@@ -1,6 +1,9 @@
 from datetime import datetime
 from weather_api import fetch_weather
 import subprocess
+import tempfile
+import zipfile
+import os
 
 def get_datetime():
     """UC1: Returnează data și ora curentă de pe server."""
@@ -58,3 +61,69 @@ def get_weather_data(location):
     if not location:
         return "Eroare: Locația trimisă este goală!"
     return fetch_weather(location)
+
+
+def compile_and_run_zip(zip_bytes):
+    """UC4: Salvează zip-ul în RAM/disc temporar, dezarhivează, compilează și rulează."""
+    # Creăm un director temporar izolat în sistemul Linux
+    with tempfile.TemporaryDirectory() as temp_dir:
+        zip_path = os.path.join(temp_dir, "archive.zip")
+
+        # Salvăm octeții primiți în fișierul zip temporar
+        with open(zip_path, "wb") as f:
+            f.write(zip_bytes)
+
+        try:
+            # Dezarhivăm conținutul direct în folderul temporar
+            with zipfile.ZipFile(zip_path, 'r') as zip_ref:
+                zip_ref.extractall(temp_dir)
+        except Exception as e:
+            return f"Eroare la dezarhivare: {e}"
+
+        # Ștergem arhiva zip acum, ca să nu încurce compilatorul la căutarea fișierelor
+        os.remove(zip_path)
+
+        # Căutăm fișierele .cpp din folderul temporar
+        cpp_files = [os.path.join(temp_dir, f) for f in os.listdir(temp_dir) if f.endswith('.cpp')]
+        if not cpp_files:
+            return "Eroare: Nu s-a găsit niciun fișier .cpp în rădăcina arhivei ZIP!"
+
+        output_binary = os.path.join(temp_dir, "program_binar")
+
+        # --- COMPILAREA ---
+        # Construim comanda de compilare: g++ main.cpp helper.cpp -o program_binar
+        comanda_compilare = ["g++"] + cpp_files + ["-o", output_binary]
+
+        rezultat_compilare = subprocess.run(
+            comanda_compilare,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True
+        )
+
+        # Dacă codul de retur nu e 0, înseamnă că avem erori de compilare
+        if rezultat_compilare.returncode != 0:
+            return f"=== EROARE DE COMPILARE ===\n{rezultat_compilare.stderr}"
+
+        # --- EXECUTAREA ---
+        try:
+            # Rulăm binarul proaspăt compilat
+            rezultat_executie = subprocess.run(
+                [output_binary],
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+                timeout=5  # Timeout de securitate să nu ruleze la infinit
+            )
+
+            # Returnăm ce a printat programul C++ în consolă
+            return (
+                f"=== COMPILARE REUȘITĂ ===\n"
+                f"--- Rezultat Execuție: ---\n"
+                f"{rezultat_executie.stdout}"
+            )
+
+        except subprocess.TimeoutExpired:
+            return "Eroare: Execuția programului a depășit limita de 5 secunde (posibil loop infinit)."
+        except Exception as e:
+            return f"Eroare la rularea binarului: {e}"

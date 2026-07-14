@@ -27,7 +27,30 @@ def handle_client(client_socket, client_address):
                 else:
                     raspuns = get_weather_data(argument.strip())
             elif comanda == '4':
-                raspuns = "Aici se va compila codul ZIP..."
+                try:
+                    dimensiune_zip = int(argument)
+                except ValueError:
+                    client_socket.send("Eroare: Dimensiune ZIP invalidă!".encode('utf-8'))
+                    continue
+
+                # Pasul 1: Trimitem confirmarea că suntem gata să primim fișierul
+                client_socket.send("READY".encode('utf-8'))
+
+                # Pasul 2: Citim exact numărul de bytes specificat
+                date_zip = bytearray()
+                while len(date_zip) < dimensiune_zip:
+                    # Citim în bucăți de maxim 4096 bytes
+                    chunk = client_socket.recv(min(4096, dimensiune_zip - len(date_zip)))
+                    if not chunk:
+                        break
+                    date_zip.extend(chunk)
+
+                if len(date_zip) != dimensiune_zip:
+                    raspuns = "Eroare: Transmiterea ZIP-ului a fost întreruptă sau incompletă."
+                else:
+                    # Pasul 3: Trimitem bytes primiți către serviciul de compilare
+                    # Importăm funcția compile_and_run_zip din services
+                    raspuns = compile_and_run_zip(bytes(date_zip))
             else:
                 raspuns = "Comandă necunoscută."
 

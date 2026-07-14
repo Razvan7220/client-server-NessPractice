@@ -1,8 +1,10 @@
+import socket
+import os
 
 
 def run_repl(client_socket):
     while True:
-        print("\n--- MENIU COMENZI ---")
+        print("\n--- MENIU COMANDE ---")
         print("1. Afișează Data și Ora")
         print("2. Afișează Informații OS")
         print("3. Consultare Meteo")
@@ -19,19 +21,45 @@ def run_repl(client_socket):
             print("Opțiune invalidă! Încearcă din nou.")
             continue
 
-        mesaj_de_trimis = optiune
+        # UC 1 și 2
+        if optiune in ['1', '2']:
+            client_socket.send(optiune.encode('utf-8'))
 
-        # Logica specială pentru Meteo (UC3)
-        if optiune == '3':
+        # UC 3 (Meteo)
+        elif optiune == '3':
             oras = input("Introduceți orașul pentru prognoza meteo: ").strip()
             if not oras:
                 print("Eroare locală: Numele orașului nu poate fi gol!")
                 continue
-            mesaj_de_trimis = f"3:{oras}"
+            client_socket.send(f"3:{oras}".encode('utf-8'))
 
-        # Comunicarea cu serverul
-        client_socket.send(mesaj_de_trimis.encode('utf-8'))
-        raspuns = client_socket.recv(4096).decode('utf-8')  # Mărim bufferul la 4096 pentru date mai lungi
+        # UC 4 (Trimitere ZIP)
+        elif optiune == '4':
+            cale_zip = input("Introduceți calea către arhiva ZIP (ex: cod_test.zip): ").strip()
 
+            if not os.path.exists(cale_zip):
+                print(f"Eroare locală: Fișierul '{cale_zip}' nu există!")
+                continue
+
+            # Aflăm dimensiunea fișierului în octeți
+            dimensiune = os.path.getsize(cale_zip)
+
+            # Pasul A: Trimitem comanda și dimensiunea la server (ex: "4:12450")
+            client_socket.send(f"4:{dimensiune}".encode('utf-8'))
+
+            # Așteptăm confirmarea de la server ("OK")
+            confirmare = client_socket.recv(1024).decode('utf-8')
+            if confirmare != "READY":
+                print(f"Serverul a refuzat trimiterea: {confirmare}")
+                continue
+
+            # Pasul B: Deschidem ZIP-ul ca bytes și îl trimitem pe tot
+            print(f"Se trimite fișierul {cale_zip} ({dimensiune} bytes)...")
+            with open(cale_zip, "rb") as f:
+                date_binare = f.read()
+                client_socket.sendall(date_binare)
+
+        # Așteaptă răspunsul final de la server (rezultatul execuției sau erorile)
+        raspuns = client_socket.recv(8192).decode('utf-8')
         print(f"\n[Răspuns Server]:\n{raspuns}")
         input("\nApasă Enter pentru a reveni la meniu...")
