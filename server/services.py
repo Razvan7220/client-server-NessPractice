@@ -1,4 +1,5 @@
 from datetime import datetime
+from weather_api import fetch_weather
 import subprocess
 
 def get_datetime():
@@ -51,3 +52,9 @@ def get_os_info():
         f"• Procesor:       {cpu}\n"
         f"• Memorie RAM:    {memory}\n"
     )
+
+def get_weather_data(location):
+    """UC3: Apelează API-ul extern pentru a lua datele meteo ale unei locații."""
+    if not location:
+        return "Eroare: Locația trimisă este goală!"
+    return fetch_weather(location)

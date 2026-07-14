@@ -1,6 +1,4 @@
-import socket
 from services import *
-
 
 def handle_client(client_socket, client_address):
     print(f"[THREAD] Pornit pentru {client_address}")
@@ -12,13 +10,23 @@ def handle_client(client_socket, client_address):
 
             print(f"[{client_address} a cerut UC]: {data}")
 
-            if data == '1':
+            # Desfacem comanda de eventualele argumente.
+            # Dacă clientul trimite "3:Iasi", parti[0] va fi "3", iar parti[1] va fi "Iasi".
+            parti = data.split(':', 1)
+            comanda = parti[0]
+            argument = parti[1] if len(parti) > 1 else ""
+
+            if comanda == '1':
                 raspuns = f"Data și Ora Serverului: {get_datetime()}\n"
-            elif data == '2':
+            elif comanda == '2':
                 raspuns = get_os_info()
-            elif data == '3':
-                raspuns = "Aici va apărea starea vremii..."
-            elif data == '4':
+            elif comanda == '3':
+                # Validare pe server: dacă nu s-a trimis locația
+                if not argument.strip():
+                    raspuns = "Eroare: Trebuie să specifici o locație! (Ex: '3:Iasi')"
+                else:
+                    raspuns = get_weather_data(argument.strip())
+            elif comanda == '4':
                 raspuns = "Aici se va compila codul ZIP..."
             else:
                 raspuns = "Comandă necunoscută."
