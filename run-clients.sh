@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # Verificăm dacă utilizatorul a transmis portul
 if [ -z "$1" ]; then
