@@ -12,21 +12,21 @@ def handle_client(client_socket, client_address):
 
             # Desfacem comanda de eventualele argumente.
             # Dacă clientul trimite "3:Iasi", parti[0] va fi "3", iar parti[1] va fi "Iasi".
-            parti = data.split(':', 1)
-            comanda = parti[0]
-            argument = parti[1] if len(parti) > 1 else ""
+            parts = data.split(':', 1)
+            command = parts[0]
+            argument = parts[1] if len(parts) > 1 else ""
 
-            if comanda == '1':
+            if command == '1':
                 raspuns = f"Data și Ora Serverului: {get_datetime()}\n"
-            elif comanda == '2':
+            elif command == '2':
                 raspuns = get_os_info()
-            elif comanda == '3':
+            elif command == '3':
                 # Validare pe server: dacă nu s-a trimis locația
                 if not argument.strip():
                     raspuns = "Eroare: Trebuie să specifici o locație! (Ex: '3:Iasi')"
                 else:
                     raspuns = get_weather_data(argument.strip())
-            elif comanda == '4':
+            elif command == '4':
                 try:
                     dimensiune_zip = int(argument)
                 except ValueError:
