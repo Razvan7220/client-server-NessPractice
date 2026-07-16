@@ -19,7 +19,7 @@ def get_os_info():
         distro_raw = subprocess.check_output("lsb_release -d", shell=True).decode('utf-8')
         distro = distro_raw.split("Description:")[1].strip()
     except Exception:
-        distro = "Debian (detalii indisponibile)"
+        distro = "Linux (detalii indisponibile)"
 
     try:
         # 2. Uptime
