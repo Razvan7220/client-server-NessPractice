@@ -4,7 +4,7 @@ import os
 
 def run_repl(client_socket):
     while True:
-        print("\n--- MENIU COMANDE ---")
+        print("\n--- MENIU COMENZI ---")
         print("1. Afișează Data și Ora")
         print("2. Afișează Informații OS")
         print("3. Consultare Meteo")
