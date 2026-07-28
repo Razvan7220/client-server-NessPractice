@@ -18,17 +18,17 @@ do
     OPTIUNE=$(( ( RANDOM % 4 ) + 1 ))
 
     if [ "$OPTIUNE" -eq 1 ]; then
-        python3 client.py $HOST $PORT 1 > /dev/null &
+        python3 -u client.py $HOST $PORT 1 &
 
     elif [ "$OPTIUNE" -eq 2 ]; then
-        python3 client.py $HOST $PORT 2 > /dev/null &
+        python3 -u client.py $HOST $PORT 2 &
 
     elif [ "$OPTIUNE" -eq 3 ]; then
         ORAS_ALEATORIU=${ORASE[$RANDOM % ${#ORASE[@]}]}
-        python3 client.py $HOST $PORT 3 "$ORAS_ALEATORIU" > /dev/null &
+        python3 -u client.py $HOST $PORT 3 "$ORAS_ALEATORIU" &
 
     elif [ "$OPTIUNE" -eq 4 ]; then
-        python3 client.py $HOST $PORT 4 cod_test.zip > /dev/null &
+        python3 -u client.py $HOST $PORT 4 cod_test.zip &
     fi
 done
 

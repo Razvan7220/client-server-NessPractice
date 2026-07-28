@@ -5,8 +5,7 @@ FROM python:3.10-slim
 WORKDIR /app
 
 # 3. Copiem fișierele necesare (inclusiv arhiva ZIP și modulele)
-COPY client.py repl_mode.py script_mode.py run-clients.sh cod_test.zip ./
-
+COPY . .
 # 4. Dăm permisiuni de execuție scriptului Bash
 RUN chmod +x run-clients.sh
 
