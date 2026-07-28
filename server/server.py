@@ -8,7 +8,7 @@ if len(sys.argv) < 2:
     sys.exit(1)
 
 PORT = int(sys.argv[1])
-HOST = '127.0.0.1'
+HOST = '0.0.0.0'
 
 server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 server_socket.bind((HOST, PORT))

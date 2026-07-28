@@ -1,30 +1,29 @@
 import socket
 import sys
 from repl_mode import run_repl
-from script_mode import run_script_mode  # Importăm noul mod
+from script_mode import run_script_mode
 
-if len(sys.argv) < 2:
-    print("Eroare: Specificați portul! Utilizare:")
-    print("  Mod interactiv: python client.py <port>")
-    print("  Mod scriptabil: python client.py <port> <command_index> [argumente...]")
+if len(sys.argv) < 3:
+    print("Eroare: Specificați adresa și portul! Utilizare:")
+    print("  Mod interactiv: python client.py <host> <port>")
+    print("  Mod scriptabil: python client.py <host> <port> <command_index> [argumente...]")
     sys.exit(1)
 
-PORT = int(sys.argv[1])
-HOST = '127.0.0.1'
+# MODIFICAREA ESTE AICI (Apar 2 argumente obligatorii acum):
+HOST = sys.argv[1]
+PORT = int(sys.argv[2])
 
 client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
 try:
     client_socket.connect((HOST, PORT))
 
-    # Dacă avem argumente suplimentare, înseamnă că rulăm în mod scriptabil
-    # sys.argv[0] este 'client.py', sys.argv[1] este portul, deci de la sys.argv[2] încolo sunt comenzile
-    if len(sys.argv) >= 3:
-        # Trimitem restul argumentelor către script_mode (de la indexul 2 încolo)
-        run_script_mode(client_socket, sys.argv[2:])
+    # Deoarece sys.argv[0] e fisierul, sys.argv[1] e host-ul, sys.argv[2] e portul,
+    # comenzile efective incep acum de la indexul 3.
+    if len(sys.argv) >= 4:
+        run_script_mode(client_socket, sys.argv[3:])
     else:
-        # Modul interactiv standard (REPL)
-        print("✔ Conexiune reușită la server!")
+        print(f"✔ Conexiune reușită la serverul {HOST}:{PORT}!")
         run_repl(client_socket)
 
 except Exception as e:
