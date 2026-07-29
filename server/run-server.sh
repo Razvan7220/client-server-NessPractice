@@ -12,4 +12,4 @@ PORT=$1
 echo "Se pornește serverul pe portul $PORT..."
 # Executăm aplicația server în shell-ul curent
 # Folosim calea către scriptul tău de server (presupunem că e server/server.py)
-python3 server/server.py $PORT
+python3 server.py "$PORT"
